@@ -1,12 +1,9 @@
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -20,7 +17,7 @@ public class Main extends Application {
     private String RESULT = null;
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) {
         Scene scene = new Scene(setGrid(primaryStage), 800, 500);
         scene.getStylesheets().add(this.getClass().getResource("javafx.css").toExternalForm());
 
@@ -79,9 +76,10 @@ public class Main extends Application {
     }
 
     private String rename(File folder){
-        File newFolder = new File(folder.getPath()+"-pièces");
-        if (newFolder.isDirectory()){return "Le dossier destination existe déjà";}
-        newFolder.mkdir();
+        File newFolder = new File(folder.getPath()+"-pieces");
+        if (!newFolder.mkdir())
+            return "Le dossier destination existe déjà";
+
         for (File file : folder.listFiles()){
             try {
                 copyFileUsingStream(file,new File(newFolder.getAbsolutePath()+"\\"+file.getName()));
@@ -98,19 +96,12 @@ public class Main extends Application {
     }
 
     private static void copyFileUsingStream(File source, File dest) throws IOException {
-        InputStream is = null;
-        OutputStream os = null;
-        try {
-            is = new FileInputStream(source);
-            os = new FileOutputStream(dest);
+        try (InputStream is = new FileInputStream(source); OutputStream os = new FileOutputStream(dest)) {
             byte[] buffer = new byte[1024];
             int length;
             while ((length = is.read(buffer)) > 0) {
                 os.write(buffer, 0, length);
             }
-        } finally {
-            is.close();
-            os.close();
         }
     }
 }
